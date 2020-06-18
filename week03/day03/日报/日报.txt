@@ -1,0 +1,62 @@
+2020/06/18
+	学习大纲：
+		订单
+			- 关闭超时订单
+			- quartz集群任务重复执行问题
+			
+		一、关闭超时订单
+			1、定义job扫描订单表：
+				 a、修改订单的状态为关闭状态、结束时间、关闭时间、修改时间为当前时间
+
+				 b、把订单中商品的库存数量加回去
+					扫描条件：状态是未付款 并且 创建时间 <= 当前时间 – 2天  并且付款方式为在线支付的订单
+			2、  定义触发条件
+				a)  理论上需要实时触发（性能问题）
+
+				b)  1分钟触发一次 0 */1 * * * ?
+			TbOrderMapper.xml
+				 <!--查询超时订单  -->
+				  <select id="selectOvertimeOrder" resultMap="BaseResultMap">
+					  SELECT
+						  *
+					  FROM
+						  tb_order
+					  WHERE
+						  create_time &lt;= DATE_SUB(NOW(), INTERVAL 2 DAY)
+					  AND status = 1
+					  AND payment_type = 1
+				  </select>
+			3、步骤：
+				a、查询超时订单	  
+				b、关闭超时订单	  
+				c、把超时订单中的商品库存数量加回去
+			
+				Factory  
+					extends AdaptableJobFactory
+					//AutowireCapableBeanFactory可以将一个对象添加到SpringIOC容器中，并且完成该对象注入
+				 
+					//将obj对象添加Spring IOC容器中，并完成注入
+				
+				config  
+				  1.创建Job对象
+				  2.Cron Trigger
+				  3.创建Scheduler对象
+			4、测试
+				测试订单中商品库存数量是否加回
+				
+		二、quartz集群任务重复执行问题
+			1、解决搜索
+				使用redis分布式锁解决quartz 集群任务重复执行的问题
+				
+				
+				//解决quartz集群任务重复执行
+				if(redisClient.setnx("SETNX_LOCK_ORDER_KEY",ip,30)) {
+				//... ... ... 关闭超时订单业务
+				
+				//释放锁
+				redisClient.del("SETNX_LOCK_ORDER_KEY"); 
+				
+			2、测试	  
+				测试是否存在重复关闭订单的问题
+				  
+				  
