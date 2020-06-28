@@ -1,0 +1,45 @@
+2020/06/28
+	学习大纲：
+		- 网关服务
+			
+	一.网关服务
+		a、路由
+			所有请求都通过网关访问服务的consumer
+		b、容错
+			客户端通过zuul无法调用consumer时，使用zuul对consumer进行降级
+		c、限流
+			使用令牌桶算法实现zuul对consumer的限流
+			
+	二、工程搭建
+		创建common_zuul
+			配置 超时时间
+		
+		usian-portal-web
+			 vue.config.js
+			
+		usian-manage-web
+			配置后台服务代理	
+	三、网关路由
+		ConsumerFallback implements FallbackProvider {
+		当服务无法执行时，该方法返回托底信息
+			@Override
+			public String getRoute() {
+				//降级的服务名，多个服务return "*"
+				}
+			@Override
+			public ClientHttpResponse fallbackResponse(String route, Throwable cause) {
+				//当服务无法执行时，该方法返回托底信息
+			}
+		网关限流
+			common_zuul
+				@Component
+				public class RateLimitFilter extends ZuulFilter {//限流器
+					 // 创建令牌桶
+					// 数值越大代表处理请求量月多，数值越小代表处理请求量越少
+					private static final RateLimiter RATE_LIMIT = RateLimiter.create(1);
+			
+			
+			
+			
+			
+			
