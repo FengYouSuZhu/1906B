@@ -1,0 +1,67 @@
+2020/06/28
+	学习大纲：
+		- 分布式配置中心 config
+		- 消息总线 bus
+		
+		最终实现效果：
+			集中管理配置文件
+			运行期间动态调整配置，不需要在每个服务器部署的机器上修改配置文件。
+			当配置发生变动时，服务器不需要重启即可感知到配置的变化并应用新的配置。
+	
+	  一、分布式配置中心 config
+		1、需求分析
+			a. 集中管理配置文件
+			b. 不同环境不同配置，比如dev/test/prod/beta/release等
+
+		2、实现步骤
+			a、上传配置文件到github
+			b、创建common_config工程
+				pom.xml
+					spring-boot-starter-web
+					spring-cloud-config-server
+				application.yml
+					GitHub上面的git仓库地址 端口号
+				启动类
+					@SpringBootApplication
+					@EnableDiscoveryClient
+					@EnableConfigServer
+			注意：客户端配置文件的名称必须为bootstrap.properties
+			c、usian_item_service
+				pom.xml
+					spring-cloud-starter-config
+				bootstrap.yml
+				    需要从github上读取的资源名称,开发环境，配置中心地址
+			d、usian_item_web	
+				pom.xml
+					spring-cloud-starter-config			
+				bootstrap.yml
+				 需要从github上读取的资源名称,开发环境，配置中心地址
+				 
+				 
+		二、消息总线 bus	 
+			1、需求分析
+				运行期间当配置发生变动时，服务器不需要重启即可同步配置的变化
+				
+			2、实现步骤	 
+			  a、common_config
+				pom.xml
+					spring-cloud-starter-bus-amqp
+				application.yml
+					rabbitMQ连接配置
+					bus-refresh访问被拒绝的解决
+					
+			  b、usian_item_service
+				 pom.xml
+					spring-cloud-starter-bus-amqp
+				 usian-item-service-dev.yml
+					rabbitMQ连接配置
+			  c、usian_item_service
+				 pom.xml
+					spring-cloud-starter-bus-amqp
+				 usian-item-service-dev.yml
+					rabbitMQ连接配置
+					
+			测试：
+				Postman发送请求 是否重新下载配置文件
+				 http://127.0.0.1:3344/actuator/bus-refresh?destination=usian-item-web:* 
+		
